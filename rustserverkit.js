@@ -1,7 +1,7 @@
-const fs = require('fs-extra')
-const request = require('request-promise-native')
-const { spawnSync } = require('child_process')
 const p = require('path')
+const fs = require('fs-extra')
+const { spawnSync } = require('child_process')
+const request = require('request-promise-native')
 const unzipper = require('unzipper')
 const startProgram = function (pathToExe, args, options) {
 	if (!args) {
@@ -76,7 +76,8 @@ if (!fs.existsSync(this.dataServerDir)) {
 			let url = 'https://umod.org/games/rust/download'
 			let oxideStream = fs.createWriteStream(this.rkit.downloadsDir + '/oxide.zip')
 			let serverData = this.serverRootDir + '/RustDedicated_Data'
-			let res = await request({
+			console.log('updating Oxide...')
+			await request({
 				url,
 				mehtod: 'get',
 			}).pipe(unzipper.Extract({path: this.rkit.downloadsDir + '/extract'}))
@@ -86,16 +87,13 @@ if (!fs.existsSync(this.dataServerDir)) {
 		this.updatePlugin = function (names) {
 			let pluginsDir = this.oxidePluginsDir
 			if (names[0]){
-				names.forEach(function (name) {
+				names.forEach(async function (name) {
 					let url = 'https://umod.org/plugins/' + name + '.cs'
 					let target = fs.createWriteStream(pluginsDir + '/' + name + '.cs')
-					request({
+					console.log(`updating ${name}...`)
+					await request({
 						url,
 						method: 'get',
-					})
-					.then()
-					.catch(err => {
-						
 					})
 				})
 			}
@@ -143,15 +141,12 @@ if (!fs.existsSync(this.dataServerDir)) {
 				let content = ''
 				if (perm == 'ownerid' || perm == 'moderatorid') {
 					content = perm + ' ' + id + '"no nick", "no reason"'
+					fs.writeFileSync(usersCfg, content, 'utf8')
 				} else if (!arguments.length) {
 					content = 'ownerid ' + this.rkit.config.ownerId + ' "no nick", "no reason"\n'
-				} else {
-					console.log('no valid permission')
-				}
-				if (!fs.existsSync(usersCfg)) { 
 					fs.writeFileSync(usersCfg, content, 'utf8')
 				} else {
-					fs.appendFileSync(usersCfg, content, 'utf8')
+					console.log('no valid permission')
 				}
 			}
 			this.setConfig = function () {
@@ -168,9 +163,9 @@ if (!fs.existsSync(this.dataServerDir)) {
 					let startScript = fs.readFileSync(defaultrustBash, 'utf8')
 					let result = startScript.replace(/\$host/, name)
 					fs.writeFileSync(startrustBash, result, {encoding: 'utf8', mode: '770'})
-					console.log(`${this.server.name} started - log to ${this.rkit.serverRootDir + '/rust.log'}`)
-					startProgram(startrustBash, null, {shell:true, cwd: p.dirname(startrustBash)}) 
 				}
+				console.log(`${this.server.name} started - log to ${this.rkit.serverRootDir}/rust.log`)
+				startProgram(startrustBash, null, {shell:true, cwd: p.dirname(startrustBash)}) 
 			}
 		}
 		this.World.prototype.rkit = this.rkit
