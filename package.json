@@ -10,9 +10,9 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "extract-zip": "^1.6.7",
     "fs-extra": "^8.1.0",
     "request": "^2.88.0",
-    "request-promise-native": "^1.0.7",
-    "unzipper": "^0.10.4"
+    "request-promise-native": "^1.0.7"
   }
 }
