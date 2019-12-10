@@ -103,14 +103,23 @@ function Rustkit () {
 			let pluginsDir = this.oxidePluginsDir
 			if (names[0]){
 				for (name of names) {
-					let url = 'https://umod.org/plugins/' + name + '.cs'
-					console.log(`updating ${name}...`)
-					let plugin = await request({
-						url,
-						method: 'get',
-					})
-					fs.writeFileSync(pluginsDir + '/' + name + '.cs', plugin)
-//					await sleep(10000)
+					try {
+						let jar = request.jar()
+						let url = 'https://umod.org/plugins/' + name + '.cs'
+						console.log(`updating ${name}...`)
+						let plugin = await request({
+							url,
+							method: 'get',
+							jar,
+							headers: {
+								'User-Agent': 'PostmanRuntime/7.19.0'
+							}
+						})
+						fs.writeFileSync(pluginsDir + '/' + name + '.cs', plugin)
+						await sleep(2000)
+					} catch (err) {
+						console.log(err.response.request.headers)
+					}
 				}
 			}
 		}
